@@ -69,13 +69,6 @@ export async function parseGroceryItems(
     skip_empty_lines: true,
     trim: true,
     relax_column_count: true,
-    cast: (value, context) => {
-        // Prevent casting cprcode to number
-        if (context.column === 'cprcode') {
-            return value;
-        }
-        return context.defaultCast(value, context);
-    }
   });
 
   if (!records || records.length === 0) {
