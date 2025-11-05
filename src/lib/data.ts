@@ -1,3 +1,4 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 import { generatePlaceholderImages } from './placeholder-images-generator';
@@ -29,7 +30,15 @@ export async function parseAndSaveGroceryItems(csvContent: string) {
   const items = await parseGroceryItems(csvContent);
   await indexGroceryItems(items);
   // This will now only generate if the file doesn't exist or is empty
-  await getOrGeneratePlaceholderImages(items); 
+  await getOrGeneratePlaceholderImages(items.map((item: any) => ({
+      id: item.cprcode,
+      name: item.pr_engname || 'N/A',
+      category: item.online_category_l1_en || 'Uncategorized',
+      price: parseFloat(item.ba_nprice) || 0,
+      in_stock: item.pr_active === 'True',
+      image_seed: item.cprcode || `seed-${item.objectID}`,
+      description: item.content_en || '',
+    }))); 
   return items;
 }
 
@@ -37,7 +46,7 @@ async function getOrGeneratePlaceholderImages(items: GroceryItem[]) {
   try {
     // Check if the file exists and is not empty
     const stats = await fs.stat(getPlaceholderJsonPath());
-    if (stats.size > 0) {
+    if (stats.size > 2) { // Check for more than just empty braces {}
       return;
     }
   } catch (error: any) {
@@ -60,7 +69,13 @@ export async function parseGroceryItems(
     skip_empty_lines: true,
     trim: true,
     relax_column_count: true,
-    cast: true,
+    cast: (value, context) => {
+        // Prevent casting cprcode to number
+        if (context.column === 'cprcode') {
+            return value;
+        }
+        return context.defaultCast(value, context);
+    }
   });
 
   if (!records || records.length === 0) {
@@ -73,7 +88,7 @@ export async function parseGroceryItems(
       if (!record.cprcode) return null;
 
       return {
-        objectID: record.cprcode?.trim(),
+        objectID: String(record.cprcode).trim(),
         ...record
        };
     })
@@ -91,7 +106,7 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
     }
     const items = await parseGroceryItems(fileContent);
     // Map to the GroceryItem interface for components that still use it.
-    const groceryItems = items.map((item: any) => ({
+    const groceryItems: GroceryItem[] = items.map((item: any) => ({
       id: item.cprcode,
       name: item.pr_engname || 'N/A',
       category: item.online_category_l1_en || 'Uncategorized',
@@ -116,7 +131,7 @@ export async function saveGroceryItemsCsv(content: string) {
     const filePath = getCsvFilePath();
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     // Also clear the placeholder file to force regeneration
-    await fs.writeFile(getPlaceholderJsonPath(), '', 'utf-8');
+    await fs.writeFile(getPlaceholderJsonPath(), '{}', 'utf-8');
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
     console.error('Failed to save CSV file or clear placeholders:', error);
@@ -134,8 +149,12 @@ export async function indexGroceryItems(items: any[]) {
     }
 
     try {
+        // Clear existing objects before saving new ones
         await algoliaIndex.clearObjects();
-        await algoliaIndex.saveObjects(items);
+        const { taskID } = await algoliaIndex.saveObjects(items, {
+            autoGenerateObjectIDIfNotExist: false
+        });
+        await algoliaIndex.waitTask(taskID);
         console.log(`Successfully indexed ${items.length} items to Algolia.`);
     } catch (error) {
         console.error("Error indexing to Algolia:", error);
