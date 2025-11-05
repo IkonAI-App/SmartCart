@@ -15,7 +15,9 @@ export default function UploadPage() {
               Upload your own grocery list in CSV format.
             </p>
           </div>
-          <UploadForm />
+          <div className="p-8 border rounded-lg bg-card shadow-sm">
+            <UploadForm />
+          </div>
         </div>
       </main>
       <footer className="py-6 md:px-6 border-t">
