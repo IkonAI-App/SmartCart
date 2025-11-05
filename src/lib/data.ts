@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { generatePlaceholderImages } from "./placeholder-images-generator";
 
 export interface GroceryItem {
   id: string;
@@ -33,7 +34,7 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
       const priceIndex = headers.indexOf("ba_nprice");
       const inStockIndex = headers.indexOf("pr_active");
       
-      return rows.map((row) => {
+      const items = rows.map((row) => {
           // Split by comma, but account for commas inside quoted strings.
           const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
           if (values.length < headers.length) return null;
@@ -52,6 +53,9 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
         })
         .filter((item): item is GroceryItem => item !== null && !!item.id);
 
+        await generatePlaceholderImages(items);
+        return items;
+
     } else { // Fallback to original format
       const idIndex = headers.indexOf("id");
       const nameIndex = headers.indexOf("name");
@@ -60,7 +64,7 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
       const inStockIndex = headers.indexOf("in_stock");
       const imageSeedIndex = headers.indexOf("image_seed");
 
-      return rows
+      const items = rows
         .map((row) => {
           const values = row.split(",");
           if (values.length !== headers.length) {
@@ -79,6 +83,9 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
           };
         })
         .filter((item): item is GroceryItem => item !== null && !!item.id);
+
+      await generatePlaceholderImages(items);
+      return items;
     }
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
