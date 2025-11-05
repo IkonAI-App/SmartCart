@@ -1,90 +1,95 @@
 "use client";
 
 import type { GroceryItem } from "@/lib/data";
-import { useState, useMemo, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import {
+  InstantSearch,
+  SearchBox,
+  Hits,
+  RefinementList,
+  Stats,
+} from "react-instantsearch";
+import algoliasearch from "algoliasearch/lite";
 import { GroceryItemCard } from "./grocery-item-card";
-import { Search } from "lucide-react";
 
-interface GroceryListProps {
-  items: GroceryItem[];
-  categories: string[];
+const searchClient = algoliasearch(
+  "P4TK45JU0B",
+  "79eda3e9b05111a55a3e8fefd859c145"
+);
+
+function Hit({ hit }: { hit: GroceryItem }) {
+  // The hit object from Algolia might have a different structure.
+  // We need to map it to what GroceryItemCard expects.
+  // We also need to handle the fact that Algolia might return highlighted snippets.
+  const item: GroceryItem = {
+    id: hit.objectID as string,
+    name: hit.pr_engname,
+    category: hit.online_category_l1_en,
+    price: hit.ba_nprice,
+    in_stock: hit.pr_active,
+    image_seed: hit.cprcode,
+    description: hit.content_en,
+  };
+  return <GroceryItemCard item={item} />;
 }
 
-export default function GroceryList({ items, categories }: GroceryListProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const filteredItems = useMemo(() => {
-    return items
-      .filter((item) => {
-        return selectedCategory ? item.category === selectedCategory : true;
-      })
-      .filter((item) => {
-        return item.name.toLowerCase().includes(searchTerm.toLowerCase());
-      });
-  }, [items, searchTerm, selectedCategory]);
-
-  if (!isMounted) {
-    return null;
-  }
-
+export default function GroceryList({
+  items,
+  categories,
+}: {
+  items: any[];
+  categories: string[];
+}) {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search for items..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-11"
-          />
+    <InstantSearch
+      searchClient={searchClient}
+      indexName="products_manual"
+      insights
+    >
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+             <SearchBox
+                placeholder="Search for items..."
+                className="w-full"
+                classNames={{
+                  root: 'w-full',
+                  form: 'w-full',
+                  input: 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                  submitIcon: 'hidden',
+                  resetIcon: 'hidden',
+                }}
+             />
+          </div>
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <Button
-            variant={selectedCategory === null ? "default" : "outline"}
-            onClick={() => setSelectedCategory(null)}
-            className="shrink-0"
-          >
-            All
-          </Button>
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category)}
-              className="shrink-0"
-            >
-              {category}
-            </Button>
-          ))}
+
+        <div className="grid grid-cols-12 gap-8">
+            <div className="col-span-12 md:col-span-3 lg:col-span-2">
+                <h3 className="font-bold mb-2">Category</h3>
+                <RefinementList 
+                    attribute="online_category_l1_en"
+                    classNames={{
+                        list: 'space-y-2',
+                        label: 'flex items-center space-x-2',
+                        checkbox: 'h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary',
+                        labelText: 'text-sm',
+                        count: 'ml-auto text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground',
+                    }}
+                />
+            </div>
+            <div className="col-span-12 md:col-span-9 lg:col-span-10">
+                <div className="text-sm text-muted-foreground mb-4">
+                    <Stats />
+                </div>
+                <Hits
+                    hitComponent={Hit}
+                    classNames={{
+                        list: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6",
+                        item: "list-none",
+                    }}
+                />
+            </div>
         </div>
       </div>
-      <div className="text-sm text-muted-foreground">
-        Showing <strong>{filteredItems.length}</strong> of <strong>{items.length}</strong> items.
-      </div>
-      {filteredItems.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-          {filteredItems.map((item) => (
-            <GroceryItemCard key={item.id} item={item} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-16 rounded-lg border-2 border-dashed">
-          <p className="text-lg text-muted-foreground">No items found.</p>
-          <p className="text-sm text-muted-foreground/80">
-            Try a different search or filter.
-          </p>
-        </div>
-      )}
-    </div>
+    </InstantSearch>
   );
 }

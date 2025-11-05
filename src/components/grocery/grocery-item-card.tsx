@@ -17,6 +17,8 @@ interface GroceryItemCardProps {
 }
 
 export function GroceryItemCard({ item }: GroceryItemCardProps) {
+  const category = item.category || 'Uncategorized';
+  
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <CardHeader className="p-0 relative">
@@ -46,8 +48,8 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
             {item.name}
           </CardTitle>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0 ml-2">
-            <CategoryIcon category={item.category} className="h-4 w-4" />
-            <span>{item.category}</span>
+            <CategoryIcon category={category} className="h-4 w-4" />
+            <span className="truncate">{category}</span>
           </div>
         </div>
         <CardDescription className="text-sm text-muted-foreground line-clamp-2 flex-grow">
@@ -55,7 +57,7 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         </CardDescription>
         <div className="flex-grow"></div>
         <p className="text-2xl font-bold font-sans text-primary mt-2">
-          ฿{item.price.toFixed(2)}
+          ฿{item.price?.toFixed(2) || '0.00'}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
