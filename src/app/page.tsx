@@ -3,10 +3,22 @@ import { getGroceryItems } from "@/lib/data";
 import GroceryList from "@/components/grocery/grocery-list";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import fs from 'fs/promises';
+import path from 'path';
 
 export default async function Home() {
-  const items = await getGroceryItems();
-  const categories = [...new Set(items.map((item) => item.category))].sort();
+  // We check if the CSV exists to determine if we should show the list or the upload prompt.
+  // The actual data is now fetched by Algolia's InstantSearch on the client-side.
+  const csvFilePath = path.join(process.cwd(), 'public/data/grocery-items.csv');
+  let csvExists = false;
+  try {
+    await fs.stat(csvFilePath);
+    csvExists = true;
+  } catch (error) {
+    // File doesn't exist
+    csvExists = false;
+  }
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -21,8 +33,8 @@ export default async function Home() {
             your favorite items.
           </p>
         </div>
-        {items.length > 0 ? (
-          <GroceryList items={items} categories={categories} />
+        {csvExists ? (
+          <GroceryList />
         ) : (
           <div className="text-center py-16 rounded-lg border-2 border-dashed">
             <p className="text-lg text-muted-foreground">

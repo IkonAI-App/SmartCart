@@ -32,13 +32,7 @@ function Hit({ hit }: { hit: any }) {
   return <GroceryItemCard item={item} />;
 }
 
-export default function GroceryList({
-  items,
-  categories,
-}: {
-  items: any[];
-  categories: string[];
-}) {
+export default function GroceryList() {
   return (
     <InstantSearch
       searchClient={searchClient}
