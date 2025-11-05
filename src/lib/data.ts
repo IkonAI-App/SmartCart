@@ -14,12 +14,26 @@ export interface GroceryItem {
 
 const getCsvFilePath = () =>
   path.join(process.cwd(), 'public/data/grocery-items.csv');
+const getPlaceholderJsonPath = () =>
+  path.join(process.cwd(), 'src', 'lib', 'placeholder-images.json');
+
 
 export async function parseAndSaveGroceryItems(csvContent: string) {
   await saveGroceryItemsCsv(csvContent);
   const items = await parseGroceryItems(csvContent);
-  await generatePlaceholderImages(items);
+  // This will now only generate if the file doesn't exist or is empty
+  await getOrGeneratePlaceholderImages(items); 
   return items;
+}
+
+async function getOrGeneratePlaceholderImages(items: GroceryItem[]) {
+  try {
+    await fs.access(getPlaceholderJsonPath());
+    // File exists, do nothing.
+  } catch {
+    // File doesn't exist, generate it.
+    await generatePlaceholderImages(items);
+  }
 }
 
 export async function parseGroceryItems(
@@ -31,42 +45,46 @@ export async function parseGroceryItems(
     trim: true,
   });
 
-  const headers = Object.keys(records[0] || {});
-  
-  if (headers.includes('cprcode')) {
-     const items = records.map((record: any) => {
-        const id = record.cprcode?.trim();
-        if (!id) return null;
-
-        return {
-          id: id,
-          name: record.pr_engname?.trim().replace(/"/g, '') || 'N/A',
-          category: record.online_category_l2_en?.trim().replace(/"/g, '') || 'Uncategorized',
-          price: parseFloat(record.ba_nprice) || 0,
-          in_stock: record.pr_active?.trim().toLowerCase() === 'true',
-          image_seed: id,
-        };
-      })
-      .filter((item: any): item is GroceryItem => item !== null && !!item.id);
-      return items;
-  } else { // Fallback to original format
-      const items = records.map((record: any) => {
-        const id = record.id?.trim();
-        if(!id) return null;
-
-        const price = parseFloat(record.price);
-        return {
-          id: id,
-          name: record.name?.trim() || 'N/A',
-          category: record.category?.trim() || 'Uncategorized',
-          price: isNaN(price) ? 0 : price,
-          in_stock: record.in_stock?.trim().toLowerCase() === 'true',
-          image_seed: record.image_seed?.trim() || id,
-        };
-      })
-      .filter((item: any): item is GroceryItem => item !== null && !!item.id);
-    return items;
+  if (!records || records.length === 0) {
+    return [];
   }
+  
+  const headers = Object.keys(records[0]);
+  const hasCprCode = headers.includes('cprcode');
+
+  const items = records
+    .map((record: any) => {
+      let id: string;
+      let name: string;
+      let category: string;
+      let price: number;
+      let in_stock: boolean;
+      let image_seed: string;
+
+      if (hasCprCode) {
+        id = record.cprcode?.trim();
+        name = record.pr_engname?.trim().replace(/"/g, '') || 'N/A';
+        category = record.online_category_l2_en?.trim().replace(/"/g, '') || 'Uncategorized';
+        price = parseFloat(record.ba_nprice) || 0;
+        in_stock = record.pr_active?.trim().toLowerCase() === 'true';
+        image_seed = id;
+      } else {
+        id = record.id?.trim();
+        name = record.name?.trim() || 'N/A';
+        category = record.category?.trim() || 'Uncategorized';
+        const parsedPrice = parseFloat(record.price);
+        price = isNaN(parsedPrice) ? 0 : parsedPrice;
+        in_stock = record.in_stock?.trim().toLowerCase() === 'true';
+        image_seed = record.image_seed?.trim() || id;
+      }
+      
+      if (!id) return null;
+
+      return { id, name, category, price, in_stock, image_seed };
+    })
+    .filter((item: any): item is GroceryItem => item !== null);
+
+  return items;
 }
 
 
@@ -74,13 +92,11 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
   try {
     const filePath = getCsvFilePath();
     const fileContent = await fs.readFile(filePath, 'utf-8');
-
     const items = await parseGroceryItems(fileContent);
-    await generatePlaceholderImages(items);
+    await getOrGeneratePlaceholderImages(items);
     return items;
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      // File doesn't exist, which is fine. Return empty array.
       return [];
     }
     console.error('Failed to read grocery items:', error);

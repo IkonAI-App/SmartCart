@@ -1,6 +1,7 @@
 "use server";
 import { parseAndSaveGroceryItems } from "@/lib/data";
 import { revalidatePath } from "next/cache";
+import { redirect } from 'next/navigation';
 
 export async function uploadCsvAction(formData: FormData): Promise<{ success: boolean; error?: string }> {
   const file = formData.get("file") as File;
@@ -16,12 +17,14 @@ export async function uploadCsvAction(formData: FormData): Promise<{ success: bo
   try {
     const fileContent = await file.text();
     await parseAndSaveGroceryItems(fileContent);
-
-    revalidatePath("/");
-    return { success: true };
+    
+    // Instead of revalidating here, we will redirect and let the home page fetch the new data.
+    // revalidatePath("/");
   } catch (error) {
     console.error(error);
     const errorMessage = error instanceof Error ? error.message : "Failed to process CSV file.";
     return { success: false, error: errorMessage };
   }
+
+  redirect('/');
 }

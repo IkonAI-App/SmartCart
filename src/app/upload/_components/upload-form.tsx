@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +11,6 @@ import { Loader2 } from "lucide-react";
 export default function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,22 +34,18 @@ export default function UploadForm() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const result = await uploadCsvAction(formData);
-
-    setIsSubmitting(false);
-
-    if (result.success) {
-      toast({
-        title: "Upload successful",
-        description: "Your grocery list has been updated.",
-      });
-      router.push("/");
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Upload failed",
-        description: result.error || "An unknown error occurred.",
-      });
+    try {
+        await uploadCsvAction(formData);
+        // The redirect will happen on the server, so we might not see the success toast.
+        // The user will see the home page with updated data.
+    } catch (error) {
+         setIsSubmitting(false);
+         const result = (error as any)?.digest ? JSON.parse((error as any).digest) : { error: 'An unknown error occurred.' };
+         toast({
+            variant: "destructive",
+            title: "Upload failed",
+            description: result.error || "An unknown error occurred.",
+        });
     }
   };
 
