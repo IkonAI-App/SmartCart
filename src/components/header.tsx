@@ -1,5 +1,6 @@
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Upload } from "lucide-react";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
 export function Header() {
   return (
@@ -13,8 +14,11 @@ export function Header() {
             SmartCart
           </h1>
         </a>
-        <Button variant="outline">
-            My List
+        <Button asChild variant="outline">
+          <Link href="/upload">
+            <Upload className="mr-2 h-4 w-4" />
+            Upload CSV
+          </Link>
         </Button>
       </div>
     </header>
