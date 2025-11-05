@@ -14,9 +14,7 @@ interface GroceryListProps {
 
 export default function GroceryList({ items, categories }: GroceryListProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    null
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -34,7 +32,7 @@ export default function GroceryList({ items, categories }: GroceryListProps) {
   }, [items, searchTerm, selectedCategory]);
 
   if (!isMounted) {
-    return null; // or a loading skeleton
+    return null;
   }
 
   return (
@@ -70,7 +68,9 @@ export default function GroceryList({ items, categories }: GroceryListProps) {
           ))}
         </div>
       </div>
-
+      <div className="text-sm text-muted-foreground">
+        Showing <strong>{filteredItems.length}</strong> of <strong>{items.length}</strong> items.
+      </div>
       {filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {filteredItems.map((item) => (
@@ -79,10 +79,10 @@ export default function GroceryList({ items, categories }: GroceryListProps) {
         </div>
       ) : (
         <div className="text-center py-16 rounded-lg border-2 border-dashed">
-          <p className="text-lg text-muted-foreground">
-            No items found.
+          <p className="text-lg text-muted-foreground">No items found.</p>
+          <p className="text-sm text-muted-foreground/80">
+            Try a different search or filter.
           </p>
-          <p className="text-sm text-muted-foreground/80">Try a different search or filter.</p>
         </div>
       )}
     </div>
