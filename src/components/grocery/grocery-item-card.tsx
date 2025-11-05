@@ -2,6 +2,7 @@ import type { GroceryItem } from "@/lib/data";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -49,6 +50,9 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
             <span>{item.category}</span>
           </div>
         </div>
+        <CardDescription className="text-sm text-muted-foreground line-clamp-2 flex-grow">
+          {item.description}
+        </CardDescription>
         <div className="flex-grow"></div>
         <p className="text-2xl font-bold font-sans text-primary mt-2">
           ฿{item.price.toFixed(2)}

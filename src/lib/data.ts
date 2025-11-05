@@ -10,6 +10,7 @@ export interface GroceryItem {
   price: number;
   in_stock: boolean;
   image_seed: string;
+  description: string;
 }
 
 const getCsvFilePath = () =>
@@ -52,7 +53,7 @@ export async function parseGroceryItems(
     columns: true,
     skip_empty_lines: true,
     trim: true,
-    relax_column_count: true, // This is important for handling rows that may not have all columns
+    relax_column_count: true,
   });
 
   if (!records || records.length === 0) {
@@ -70,14 +71,16 @@ export async function parseGroceryItems(
       let price: number;
       let in_stock: boolean;
       let image_seed: string;
+      let description: string;
 
       if (hasCprCode) {
         id = record.cprcode?.trim();
         name = record.pr_engname?.trim().replace(/"/g, '') || 'N/A';
-        category = record.online_category_l2_en?.trim().replace(/"/g, '') || 'Uncategorized';
+        category = record.online_category_l1_en?.trim().replace(/"/g, '') || 'Uncategorized';
         price = parseFloat(record.ba_nprice) || 0;
         in_stock = record.pr_active?.trim().toLowerCase() === 'true';
         image_seed = id || `seed-${index}`;
+        description = record.content_en?.trim().replace(/"/g, '') || '';
       } else {
         id = record.id?.trim();
         name = record.name?.trim() || 'N/A';
@@ -86,11 +89,12 @@ export async function parseGroceryItems(
         price = isNaN(parsedPrice) ? 0 : parsedPrice;
         in_stock = record.in_stock?.trim().toLowerCase() === 'true';
         image_seed = record.image_seed?.trim() || id || `seed-${index}`;
+        description = record.description?.trim() || '';
       }
       
       if (!id) return null;
 
-      return { id, name, category, price, in_stock, image_seed };
+      return { id, name, category, price, in_stock, image_seed, description };
     })
     .filter((item: any): item is GroceryItem => item !== null);
 
