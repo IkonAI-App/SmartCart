@@ -16,7 +16,7 @@ const searchClient = algoliasearch(
   "79eda3e9b05111a55a3e8fefd859c145"
 );
 
-function Hit({ hit }: { hit: GroceryItem }) {
+function Hit({ hit }: { hit: any }) {
   // The hit object from Algolia might have a different structure.
   // We need to map it to what GroceryItemCard expects.
   // We also need to handle the fact that Algolia might return highlighted snippets.
@@ -24,8 +24,8 @@ function Hit({ hit }: { hit: GroceryItem }) {
     id: hit.objectID as string,
     name: hit.pr_engname,
     category: hit.online_category_l1_en,
-    price: hit.ba_nprice,
-    in_stock: hit.pr_active,
+    price: parseFloat(hit.ba_nprice) || 0,
+    in_stock: hit.pr_active === 'True' || hit.pr_active === true,
     image_seed: hit.cprcode,
     description: hit.content_en,
   };
