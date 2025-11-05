@@ -17,7 +17,7 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
     const filePath = getCsvFilePath();
     const fileContent = await fs.readFile(filePath, "utf-8");
 
-    const rows = fileContent.trim().split("\n");
+    const rows = fileContent.trim().split(/\r?\n/);
     if (rows.length <= 1) {
       return [];
     }
