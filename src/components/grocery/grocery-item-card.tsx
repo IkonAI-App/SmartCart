@@ -20,8 +20,12 @@ interface GroceryItemCardProps {
 
 export function GroceryItemCard({ item }: GroceryItemCardProps) {
   const category = item.category || 'Uncategorized';
-  const imageUrl = `https://d19oj5aeuefgv.cloudfront.net/${String(item.id).padStart(7, '0')}`;
   
+  // Extract the 7-digit code from the beginning of the description.
+  const match = item.description?.match(/^\d{7}/);
+  const imageCode = match ? match[0] : null;
+  const imageUrl = imageCode ? `https://d19oj5aeuefgv.cloudfront.net/${imageCode}` : `https://picsum.photos/seed/${item.id}/400/300`;
+
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <CardHeader className="p-0 relative">
@@ -62,16 +66,13 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
           </div>
         </div>
         <CardDescription className="text-sm text-muted-foreground line-clamp-2 flex-grow">
-          {item.description}
+          {/* We display the description without the code */}
+          {item.description?.replace(/^\d{7}\s*/, '')}
         </CardDescription>
         <div className="flex-grow"></div>
         <p className="text-2xl font-bold font-sans text-primary mt-2">
           ฿{item.price?.toFixed(2) || '0.00'}
         </p>
-        <div className="mt-2">
-            <p className="text-xs text-muted-foreground">Debug: Image URL</p>
-            <pre className="text-xs bg-muted p-1 rounded-sm overflow-x-auto"><code>{imageUrl}</code></pre>
-        </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button className="w-full" disabled={!item.in_stock}>
