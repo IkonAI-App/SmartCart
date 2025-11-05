@@ -1,7 +1,6 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { generatePlaceholderImages } from './placeholder-images-generator';
 import { parse } from 'csv-parse/sync';
 import algoliasearch from 'algoliasearch';
 
@@ -20,44 +19,12 @@ export interface GroceryItem {
 
 const getCsvFilePath = () =>
   path.join(process.cwd(), 'public/data/grocery-items.csv');
-const getPlaceholderJsonPath = () =>
-  path.join(process.cwd(), 'src', 'lib', 'placeholder-images.json');
-
 
 export async function parseAndSaveGroceryItems(csvContent: string) {
   await saveGroceryItemsCsv(csvContent);
   const items = await parseGroceryItems(csvContent);
   await indexGroceryItems(items);
-  // This will now only generate if the file doesn't exist or is empty
-  await getOrGeneratePlaceholderImages(items.map((item: any) => ({
-      id: item.objectID,
-      name: item.pr_engname || 'N/A',
-      category: item.online_category_l1_en || 'Uncategorized',
-      price: parseFloat(item.ba_nprice) || 0,
-      in_stock: item.pr_active === 'True',
-      image_seed: item.cprcode || `seed-${item.objectID}`,
-      description: item.content_en || '',
-    }))); 
   return items;
-}
-
-async function getOrGeneratePlaceholderImages(items: (GroceryItem & { image_seed: string })[]) {
-  try {
-    // Check if the file exists and is not empty
-    const stats = await fs.stat(getPlaceholderJsonPath());
-    if (stats.size > 2) { // Check for more than just empty braces {}
-      return;
-    }
-  } catch (error: any) {
-    // If file does not exist, that's fine, we'll generate it.
-    if (error.code !== 'ENOENT') {
-      console.error("Error checking placeholder images file:", error);
-      // Don't block the main operation if this check fails
-      return;
-    }
-  }
-  // File doesn't exist or is empty, so generate it.
-  await generatePlaceholderImages(items);
 }
 
 export async function parseGroceryItems(
@@ -92,7 +59,7 @@ export async function parseGroceryItems(
 
 export async function getGroceryItems(): Promise<GroceryItem[]> {
   // This function is no longer the primary source of truth for the list component,
-  // but it's kept for potential direct data access and for generating placeholders.
+  // but can be used for other purposes if needed.
   try {
     const filePath = getCsvFilePath();
     const fileContent = await fs.readFile(filePath, 'utf-8');
@@ -100,18 +67,16 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
       return [];
     }
     const items = await parseGroceryItems(fileContent);
-    // Map to the GroceryItem interface for components that still use it.
-    const groceryItems: (GroceryItem & { image_seed: string })[] = items.map((item: any) => ({
+    // Map to the GroceryItem interface.
+    const groceryItems: GroceryItem[] = items.map((item: any) => ({
       id: item.objectID,
       name: item.pr_engname || 'N/A',
       category: item.online_category_l1_en || 'Uncategorized',
       price: parseFloat(item.ba_nprice) || 0,
       in_stock: item.pr_active === 'True',
-      image_seed: item.cprcode || `seed-${item.objectID}`,
       description: item.content_en || '',
     }));
-    await getOrGeneratePlaceholderImages(groceryItems);
-    return groceryItems.map(({image_seed, ...rest}) => rest);
+    return groceryItems;
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       return [];
@@ -125,11 +90,9 @@ export async function saveGroceryItemsCsv(content: string) {
   try {
     const filePath = getCsvFilePath();
     await fs.mkdir(path.dirname(filePath), { recursive: true });
-    // Also clear the placeholder file to force regeneration
-    await fs.writeFile(getPlaceholderJsonPath(), '{}', 'utf-8');
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
-    console.error('Failed to save CSV file or clear placeholders:', error);
+    console.error('Failed to save CSV file:', error);
     throw new Error('Could not save CSV file.');
   }
 }
