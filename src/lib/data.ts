@@ -28,12 +28,21 @@ export async function parseAndSaveGroceryItems(csvContent: string) {
 
 async function getOrGeneratePlaceholderImages(items: GroceryItem[]) {
   try {
-    await fs.access(getPlaceholderJsonPath());
-    // File exists, do nothing.
-  } catch {
-    // File doesn't exist, generate it.
-    await generatePlaceholderImages(items);
+    // Check if the file exists and is not empty
+    const stats = await fs.stat(getPlaceholderJsonPath());
+    if (stats.size > 0) {
+      return;
+    }
+  } catch (error: any) {
+    // If file does not exist, that's fine, we'll generate it.
+    if (error.code !== 'ENOENT') {
+      console.error("Error checking placeholder images file:", error);
+      // Don't block the main operation if this check fails
+      return;
+    }
   }
+  // File doesn't exist or is empty, so generate it.
+  await generatePlaceholderImages(items);
 }
 
 export async function parseGroceryItems(
@@ -43,6 +52,7 @@ export async function parseGroceryItems(
     columns: true,
     skip_empty_lines: true,
     trim: true,
+    relax_column_count: true, // This is important for handling rows that may not have all columns
   });
 
   if (!records || records.length === 0) {
@@ -53,7 +63,7 @@ export async function parseGroceryItems(
   const hasCprCode = headers.includes('cprcode');
 
   const items = records
-    .map((record: any) => {
+    .map((record: any, index: number) => {
       let id: string;
       let name: string;
       let category: string;
@@ -67,7 +77,7 @@ export async function parseGroceryItems(
         category = record.online_category_l2_en?.trim().replace(/"/g, '') || 'Uncategorized';
         price = parseFloat(record.ba_nprice) || 0;
         in_stock = record.pr_active?.trim().toLowerCase() === 'true';
-        image_seed = id;
+        image_seed = id || `seed-${index}`;
       } else {
         id = record.id?.trim();
         name = record.name?.trim() || 'N/A';
@@ -75,7 +85,7 @@ export async function parseGroceryItems(
         const parsedPrice = parseFloat(record.price);
         price = isNaN(parsedPrice) ? 0 : parsedPrice;
         in_stock = record.in_stock?.trim().toLowerCase() === 'true';
-        image_seed = record.image_seed?.trim() || id;
+        image_seed = record.image_seed?.trim() || id || `seed-${index}`;
       }
       
       if (!id) return null;
@@ -92,6 +102,9 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
   try {
     const filePath = getCsvFilePath();
     const fileContent = await fs.readFile(filePath, 'utf-8');
+    if (!fileContent) {
+      return [];
+    }
     const items = await parseGroceryItems(fileContent);
     await getOrGeneratePlaceholderImages(items);
     return items;
@@ -108,9 +121,11 @@ export async function saveGroceryItemsCsv(content: string) {
   try {
     const filePath = getCsvFilePath();
     await fs.mkdir(path.dirname(filePath), { recursive: true });
+    // Also clear the placeholder file to force regeneration
+    await fs.writeFile(getPlaceholderJsonPath(), '', 'utf-8');
     await fs.writeFile(filePath, content, 'utf-8');
   } catch (error) {
-    console.error('Failed to save CSV file:', error);
+    console.error('Failed to save CSV file or clear placeholders:', error);
     throw new Error('Could not save CSV file.');
   }
 }
