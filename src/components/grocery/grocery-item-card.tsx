@@ -68,6 +68,10 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         <p className="text-2xl font-bold font-sans text-primary mt-2">
           ฿{item.price?.toFixed(2) || '0.00'}
         </p>
+        <div className="mt-2">
+            <p className="text-xs text-muted-foreground">Debug: Image URL</p>
+            <pre className="text-xs bg-muted p-1 rounded-sm overflow-x-auto"><code>{imageUrl}</code></pre>
+        </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button className="w-full" disabled={!item.in_stock}>
