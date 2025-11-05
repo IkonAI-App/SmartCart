@@ -1,6 +1,8 @@
 import { Header } from "@/components/header";
 import { getGroceryItems } from "@/lib/data";
 import GroceryList from "@/components/grocery/grocery-list";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function Home() {
   const items = await getGroceryItems();
@@ -19,7 +21,21 @@ export default async function Home() {
             your favorite items.
           </p>
         </div>
-        <GroceryList items={items} categories={categories} />
+        {items.length > 0 ? (
+          <GroceryList items={items} categories={categories} />
+        ) : (
+          <div className="text-center py-16 rounded-lg border-2 border-dashed">
+            <p className="text-lg text-muted-foreground">
+              No grocery items found.
+            </p>
+            <p className="text-sm text-muted-foreground/80 mb-4">
+              Upload your CSV file to get started.
+            </p>
+            <Button asChild>
+              <Link href="/upload">Upload CSV</Link>
+            </Button>
+          </div>
+        )}
       </main>
       <footer className="py-6 md:px-6 border-t">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
