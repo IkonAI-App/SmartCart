@@ -1,5 +1,5 @@
 "use server";
-import { saveGroceryItemsCsv } from "@/lib/data";
+import { parseAndSaveGroceryItems } from "@/lib/data";
 import { revalidatePath } from "next/cache";
 
 export async function uploadCsvAction(formData: FormData): Promise<{ success: boolean; error?: string }> {
@@ -15,12 +15,13 @@ export async function uploadCsvAction(formData: FormData): Promise<{ success: bo
 
   try {
     const fileContent = await file.text();
-    await saveGroceryItemsCsv(fileContent);
+    await parseAndSaveGroceryItems(fileContent);
 
     revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error(error);
-    return { success: false, error: "Failed to process CSV file." };
+    const errorMessage = error instanceof Error ? error.message : "Failed to process CSV file.";
+    return { success: false, error: errorMessage };
   }
 }

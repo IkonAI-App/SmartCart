@@ -1,1 +1,94 @@
-{"placeholderImages":[]}]}
+{
+  "placeholderImages": [
+    {
+      "id": "grocery-1",
+      "description": "Apple",
+      "imageUrl": "https://images.unsplash.com/photo-1574856344991-aaa31b6f4ce3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmcnVpdHxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fruit"
+    },
+    {
+      "id": "grocery-2",
+      "description": "Milk",
+      "imageUrl": "https://images.unsplash.com/photo-1602153508753-4ace888c10a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkYWlyeXxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dairy"
+    },
+    {
+      "id": "grocery-3",
+      "description": "Bread",
+      "imageUrl": "https://images.unsplash.com/photo-1623334044303-241021148842?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxiYWtlcnl8ZW58MHx8fHwxNzYyMzE0MTYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bakery"
+    },
+    {
+      "id": "grocery-4",
+      "description": "Chicken Breast",
+      "imageUrl": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtZWF0fGVufDB8fHx8MTc2MjMxNDE2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "meat"
+    },
+    {
+      "id": "grocery-5",
+      "description": "Carrot",
+      "imageUrl": "https://images.unsplash.com/photo-1590165482129-1b8b27698780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx2ZWdldGFibGV8ZW58MHx8fHwxNzYyMjA4NDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vegetable"
+    },
+    {
+      "id": "grocery-6",
+      "description": "Banana",
+      "imageUrl": "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmcnVpdHxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fruit"
+    },
+    {
+      "id": "grocery-7",
+      "description": "Yogurt",
+      "imageUrl": "https://images.unsplash.com/photo-1594731884638-8197c3102d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkYWlyeXxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dairy"
+    },
+    {
+      "id": "grocery-8",
+      "description": "Baguette",
+      "imageUrl": "https://images.unsplash.com/photo-1556745750-68295fefafc5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MXwxfHNlYXJjaHw4fHxiYWtlcnl8ZW58MHx8fHwxNzYyMzE0MTYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bakery"
+    },
+    {
+      "id": "grocery-9",
+      "description": "Salmon Fillet",
+      "imageUrl": "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWVhdHxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "meat"
+    },
+    {
+      "id": "grocery-10",
+      "description": "Tomato",
+      "imageUrl": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2ZWdldGFibGV8ZW58MHx8fHwxNzYyMjA4NDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vegetable"
+    },
+    {
+      "id": "grocery-11",
+      "description": "Orange",
+      "imageUrl": "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmcnVpdHxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fruit"
+    },
+    {
+      "id": "grocery-12",
+      "description": "Cheddar Cheese",
+      "imageUrl": "https://images.unsplash.com/photo-1502590464431-3b66d77494d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkYWlyeXxlbnwwfHx8fDE3NjIzMTQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dairy"
+    },
+    {
+      "id": "grocery-13",
+      "description": "Croissant",
+      "imageUrl": "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxiYWtlcnl8ZW58MHx8fHwxNzYyMzE0MTYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bakery"
+    },
+    {
+      "id": "grocery-14",
+      "description": "Ground Beef",
+      "imageUrl": "https://images.unsplash.com/photo-1690983325551-b922137727be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtZWF0fGVufDB8fHx8MTc2MjMxNDE2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "meat"
+    },
+    {
+      "id": "grocery-15",
+      "description": "Broccoli",
+      "imageUrl": "https://images.unsplash.com/photo-1587049633312-d628ae50a8ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx2ZWdldGFibGV8ZW58MHx8fHwxNzYyMjA4NDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vegetable"
+    }
+  ]
+}
