@@ -22,7 +22,8 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
       return [];
     }
 
-    const headers = rows.shift()?.split(",") ?? [];
+    const headerRow = rows.shift() ?? '';
+    const headers = headerRow.split(",");
     
     // Check if it's the user-provided format by looking for 'cprcode'
     if (headers.includes('cprcode')) {
@@ -33,14 +34,17 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
       const inStockIndex = headers.indexOf("pr_active");
       
       return rows.map((row) => {
-          const values = row.split(',');
+          // Split by comma, but account for commas inside quoted strings.
+          const values = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+          if (values.length < headers.length) return null;
+
           const id = values[cprcodeIndex]?.trim();
           if (!id) return null;
 
           return {
             id: id,
-            name: values[prEngNameIndex]?.trim() || 'N/A',
-            category: values[categoryIndex]?.trim() || 'Uncategorized',
+            name: values[prEngNameIndex]?.trim().replace(/"/g, '') || 'N/A',
+            category: values[categoryIndex]?.trim().replace(/"/g, '') || 'Uncategorized',
             price: parseFloat(values[priceIndex]) || 0,
             in_stock: values[inStockIndex]?.trim().toLowerCase() === 'true',
             image_seed: id
