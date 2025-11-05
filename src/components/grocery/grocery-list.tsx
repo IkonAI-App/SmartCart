@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { GroceryItem } from "@/lib/data";
@@ -26,7 +27,6 @@ function Hit({ hit }: { hit: any }) {
     category: hit.online_category_l1_en,
     price: parseFloat(hit.ba_nprice) || 0,
     in_stock: hit.pr_active === 'True' || hit.pr_active === true,
-    image_seed: hit.cprcode,
     description: hit.content_en,
   };
   return <GroceryItemCard item={item} />;

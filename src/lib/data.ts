@@ -15,7 +15,6 @@ export interface GroceryItem {
   category: string;
   price: number;
   in_stock: boolean;
-  image_seed: string;
   description: string;
 }
 
@@ -31,7 +30,7 @@ export async function parseAndSaveGroceryItems(csvContent: string) {
   await indexGroceryItems(items);
   // This will now only generate if the file doesn't exist or is empty
   await getOrGeneratePlaceholderImages(items.map((item: any) => ({
-      id: item.cprcode,
+      id: item.objectID,
       name: item.pr_engname || 'N/A',
       category: item.online_category_l1_en || 'Uncategorized',
       price: parseFloat(item.ba_nprice) || 0,
@@ -42,7 +41,7 @@ export async function parseAndSaveGroceryItems(csvContent: string) {
   return items;
 }
 
-async function getOrGeneratePlaceholderImages(items: GroceryItem[]) {
+async function getOrGeneratePlaceholderImages(items: (GroceryItem & { image_seed: string })[]) {
   try {
     // Check if the file exists and is not empty
     const stats = await fs.stat(getPlaceholderJsonPath());
@@ -78,10 +77,11 @@ export async function parseGroceryItems(
   const items = records
     .map((record: any, index: number) => {
       
-      if (!record.cprcode) return null;
+      const objectID = String(record.cprcode || index).trim();
+      if (!objectID) return null;
 
       return {
-        objectID: String(record.cprcode).trim(),
+        objectID: objectID,
         ...record
        };
     })
@@ -91,6 +91,8 @@ export async function parseGroceryItems(
 }
 
 export async function getGroceryItems(): Promise<GroceryItem[]> {
+  // This function is no longer the primary source of truth for the list component,
+  // but it's kept for potential direct data access and for generating placeholders.
   try {
     const filePath = getCsvFilePath();
     const fileContent = await fs.readFile(filePath, 'utf-8');
@@ -99,8 +101,8 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
     }
     const items = await parseGroceryItems(fileContent);
     // Map to the GroceryItem interface for components that still use it.
-    const groceryItems: GroceryItem[] = items.map((item: any) => ({
-      id: item.cprcode,
+    const groceryItems: (GroceryItem & { image_seed: string })[] = items.map((item: any) => ({
+      id: item.objectID,
       name: item.pr_engname || 'N/A',
       category: item.online_category_l1_en || 'Uncategorized',
       price: parseFloat(item.ba_nprice) || 0,
@@ -109,7 +111,7 @@ export async function getGroceryItems(): Promise<GroceryItem[]> {
       description: item.content_en || '',
     }));
     await getOrGeneratePlaceholderImages(groceryItems);
-    return groceryItems;
+    return groceryItems.map(({image_seed, ...rest}) => rest);
   } catch (error) {
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       return [];
