@@ -1,0 +1,16 @@
+id,name,category,price,in_stock,image_seed
+1,Apple,Fruit,1.99,TRUE,101
+2,Milk,Dairy,3.49,TRUE,102
+3,Bread,Bakery,2.99,TRUE,103
+4,Chicken Breast,Meat,9.99,FALSE,104
+5,Carrot,Vegetable,0.99,TRUE,105
+6,Banana,Fruit,0.69,TRUE,106
+7,Yogurt,Dairy,4.29,TRUE,107
+8,Baguette,Bakery,3.50,FALSE,108
+9,Salmon Fillet,Meat,12.50,TRUE,109
+10,Tomato,Vegetable,2.15,TRUE,110
+11,Orange,Fruit,1.50,TRUE,111
+12,Cheddar Cheese,Dairy,6.75,TRUE,112
+13,Croissant,Bakery,2.25,TRUE,113
+14,Ground Beef,Meat,7.99,FALSE,114
+15,Broccoli,Vegetable,1.79,TRUE,115
