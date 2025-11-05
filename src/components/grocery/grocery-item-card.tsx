@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { CategoryIcon } from "./category-icon";
+import Image from 'next/image';
 
 interface GroceryItemCardProps {
   item: GroceryItem;
@@ -18,6 +19,7 @@ interface GroceryItemCardProps {
 
 export function GroceryItemCard({ item }: GroceryItemCardProps) {
   const category = item.category || 'Uncategorized';
+  const imageUrl = `https://d19oj5aeuefgv.cloudfront.net/${String(item.id).padStart(7, '0')}`;
   
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -38,8 +40,15 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         >
           {item.in_stock ? "In Stock" : "Out of Stock"}
         </Badge>
-        <div className="w-full h-48 bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground text-sm"></span>
+        <div className="w-full h-48 bg-muted flex items-center justify-center relative">
+            <Image
+                src={imageUrl}
+                alt={item.name}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                unoptimized
+            />
         </div>
       </CardHeader>
       <CardContent className="p-4 flex-1 flex flex-col">
