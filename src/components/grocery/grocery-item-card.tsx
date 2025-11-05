@@ -1,5 +1,4 @@
 import type { GroceryItem } from "@/lib/data";
-import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -10,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { CategoryIcon } from "./category-icon";
 
 interface GroceryItemCardProps {
@@ -18,10 +16,6 @@ interface GroceryItemCardProps {
 }
 
 export function GroceryItemCard({ item }: GroceryItemCardProps) {
-  const placeholder = PlaceHolderImages.find(
-    (p) => p.id === `grocery-${item.id}`
-  );
-
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       <CardHeader className="p-0 relative">
@@ -41,20 +35,9 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         >
           {item.in_stock ? "In Stock" : "Out of Stock"}
         </Badge>
-        {placeholder ? (
-          <Image
-            src={placeholder.imageUrl}
-            alt={item.name}
-            width={400}
-            height={300}
-            className="w-full h-48 object-cover"
-            data-ai-hint={placeholder.imageHint}
-          />
-        ) : (
-          <div className="w-full h-48 bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground text-sm">No image</span>
-          </div>
-        )}
+        <div className="w-full h-48 bg-muted flex items-center justify-center">
+            <span className="text-muted-foreground text-sm"></span>
+        </div>
       </CardHeader>
       <CardContent className="p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-2">
@@ -68,7 +51,7 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         </div>
         <div className="flex-grow"></div>
         <p className="text-2xl font-bold font-sans text-primary mt-2">
-          ${item.price.toFixed(2)}
+          ฿{item.price.toFixed(2)}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
