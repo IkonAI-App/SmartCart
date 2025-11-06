@@ -30,13 +30,14 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
 
   const primaryUrl = paddedCode
     ? `https://d19oj5aeuefgv.cloudfront.net/${paddedCode}`
-    : `https://picsum.photos/seed/${item.id}/400/300`;
+    : `https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop`;
 
   const fallbackUrl = paddedCode
     ? `https://d1vl5j0v241n75.cloudfront.net/${paddedCode}`
-    : `https://picsum.photos/seed/${item.id}/400/300`;
+    : `https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop`;
 
-  const placeholderUrl = `https://picsum.photos/seed/${item.id}/400/300`;
+  const staticPlaceholderUrl = `https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop`;
+
 
   const [imageUrl, setImageUrl] = useState(primaryUrl);
 
@@ -44,9 +45,9 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
     if (imageUrl === primaryUrl) {
       setImageUrl(fallbackUrl);
     } else if (imageUrl === fallbackUrl) {
-      setImageUrl(placeholderUrl);
+      setImageUrl(staticPlaceholderUrl);
     }
-    // If placeholder also fails, do nothing to prevent infinite loop.
+    // If the static placeholder also fails, do nothing to prevent an infinite loop.
   };
 
   return (
