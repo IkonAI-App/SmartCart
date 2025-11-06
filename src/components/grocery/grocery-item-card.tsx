@@ -26,23 +26,27 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
   // Extract the 7-digit code from the beginning of the description.
   const match = item.description?.match(/^\d{7}/);
   const imageCode = match ? match[0] : null;
+  const paddedCode = imageCode?.padStart(7, "0");
 
-  const primaryUrl = imageCode
-    ? `https://d19oj5aeuefgv.cloudfront.net/${imageCode}`
+  const primaryUrl = paddedCode
+    ? `https://d19oj5aeuefgv.cloudfront.net/${paddedCode}`
     : `https://picsum.photos/seed/${item.id}/400/300`;
 
-  const fallbackUrl = imageCode
-    ? `https://d1vl5j0v241n75.cloudfront.net/${imageCode}`
+  const fallbackUrl = paddedCode
+    ? `https://d1vl5j0v241n75.cloudfront.net/${paddedCode}`
     : `https://picsum.photos/seed/${item.id}/400/300`;
+
+  const placeholderUrl = `https://picsum.photos/seed/${item.id}/400/300`;
 
   const [imageUrl, setImageUrl] = useState(primaryUrl);
 
   const handleImageError = () => {
-    // If the primary image fails, try the fallback.
-    // If the fallback is already being used, don't do anything to prevent an infinite loop.
     if (imageUrl === primaryUrl) {
       setImageUrl(fallbackUrl);
+    } else if (imageUrl === fallbackUrl) {
+      setImageUrl(placeholderUrl);
     }
+    // If placeholder also fails, do nothing to prevent infinite loop.
   };
 
   return (
@@ -91,7 +95,7 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         </CardDescription>
         <div className="flex-grow"></div>
         <p className="text-2xl font-bold font-sans text-primary mt-2">
-          ฿{item.price?.toFixed(2) || "0.00"}
+          ฿{Number(item.price)?.toFixed(2) || "0.00"}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
