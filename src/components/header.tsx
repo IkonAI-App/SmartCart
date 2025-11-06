@@ -1,4 +1,4 @@
-import { ShoppingCart, Upload } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 
@@ -14,12 +14,6 @@ export function Header() {
             SmartSearch
           </h1>
         </a>
-        <Button asChild variant="outline">
-          <Link href="/upload">
-            <Upload className="mr-2 h-4 w-4" />
-            Upload CSV
-          </Link>
-        </Button>
       </div>
     </header>
   );

@@ -1,20 +1,7 @@
 import { Header } from "@/components/header";
 import GroceryList from "@/components/grocery/grocery-list";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import fs from 'fs/promises';
-import path from 'path';
 
 export default async function Home() {
-  const csvFilePath = path.join(process.cwd(), 'public/data/grocery-items.csv');
-  let csvExists = false;
-  try {
-    await fs.stat(csvFilePath);
-    csvExists = true;
-  } catch (error) {
-    csvExists = false;
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -28,21 +15,7 @@ export default async function Home() {
             your favorite items.
           </p>
         </div>
-        {csvExists ? (
-          <GroceryList />
-        ) : (
-          <div className="text-center py-16 rounded-lg border-2 border-dashed">
-            <p className="text-lg text-muted-foreground">
-              No grocery items found.
-            </p>
-            <p className="text-sm text-muted-foreground/80 mb-4">
-              Upload your CSV file to get started.
-            </p>
-            <Button asChild>
-              <Link href="/upload">Upload CSV</Link>
-            </Button>
-          </div>
-        )}
+        <GroceryList />
       </main>
       <footer className="py-6 md:px-6 border-t">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
