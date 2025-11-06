@@ -11,7 +11,7 @@ export function Header() {
             <ShoppingCart className="h-6 w-6 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold font-headline text-foreground">
-            SmartCart
+            SmartSearch
           </h1>
         </a>
         <Button asChild variant="outline">

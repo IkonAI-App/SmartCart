@@ -22,7 +22,7 @@ export default function UploadPage() {
       </main>
       <footer className="py-6 md:px-6 border-t">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} SmartCart. All rights reserved.
+          © {new Date().getFullYear()} SmartSearch. All rights reserved.
         </div>
       </footer>
     </div>

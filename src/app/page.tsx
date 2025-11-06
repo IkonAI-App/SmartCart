@@ -1,5 +1,4 @@
 import { Header } from "@/components/header";
-import { getGroceryItems } from "@/lib/data";
 import GroceryList from "@/components/grocery/grocery-list";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -7,18 +6,14 @@ import fs from 'fs/promises';
 import path from 'path';
 
 export default async function Home() {
-  // We check if the CSV exists to determine if we should show the list or the upload prompt.
-  // The actual data is now fetched by Algolia's InstantSearch on the client-side.
   const csvFilePath = path.join(process.cwd(), 'public/data/grocery-items.csv');
   let csvExists = false;
   try {
     await fs.stat(csvFilePath);
     csvExists = true;
   } catch (error) {
-    // File doesn't exist
     csvExists = false;
   }
-
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -51,7 +46,7 @@ export default async function Home() {
       </main>
       <footer className="py-6 md:px-6 border-t">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} SmartCart. All rights reserved.
+          © {new Date().getFullYear()} SmartSearch. All rights reserved.
         </div>
       </footer>
     </div>

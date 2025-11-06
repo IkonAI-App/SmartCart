@@ -1,5 +1,7 @@
+"use client";
 
 import type { GroceryItem } from "@/lib/data";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,19 +14,36 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { CategoryIcon } from "./category-icon";
-import Image from 'next/image';
+import Image from "next/image";
 
 interface GroceryItemCardProps {
   item: GroceryItem;
 }
 
 export function GroceryItemCard({ item }: GroceryItemCardProps) {
-  const category = item.category || 'Uncategorized';
-  
+  const category = item.category || "Uncategorized";
+
   // Extract the 7-digit code from the beginning of the description.
   const match = item.description?.match(/^\d{7}/);
   const imageCode = match ? match[0] : null;
-  const imageUrl = imageCode ? `https://d19oj5aeuefgv.cloudfront.net/${imageCode}` : `https://picsum.photos/seed/${item.id}/400/300`;
+
+  const primaryUrl = imageCode
+    ? `https://d19oj5aeuefgv.cloudfront.net/${imageCode}`
+    : `https://picsum.photos/seed/${item.id}/400/300`;
+
+  const fallbackUrl = imageCode
+    ? `https://d1vl5j0v241n75.cloudfront.net/${imageCode}`
+    : `https://picsum.photos/seed/${item.id}/400/300`;
+
+  const [imageUrl, setImageUrl] = useState(primaryUrl);
+
+  const handleImageError = () => {
+    // If the primary image fails, try the fallback.
+    // If the fallback is already being used, don't do anything to prevent an infinite loop.
+    if (imageUrl === primaryUrl) {
+      setImageUrl(fallbackUrl);
+    }
+  };
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -46,13 +65,14 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
           {item.in_stock ? "In Stock" : "Out of Stock"}
         </Badge>
         <div className="w-full h-48 bg-muted flex items-center justify-center relative">
-            <Image
-                src={imageUrl}
-                alt={item.name}
-                fill
-                style={{ objectFit: 'cover' }}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
+          <Image
+            src={imageUrl}
+            alt={item.name}
+            fill
+            style={{ objectFit: "cover" }}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={handleImageError}
+          />
         </div>
       </CardHeader>
       <CardContent className="p-4 flex-1 flex flex-col">
@@ -67,11 +87,11 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         </div>
         <CardDescription className="text-sm text-muted-foreground line-clamp-2 flex-grow">
           {/* We display the description without the code */}
-          {item.description?.replace(/^\d{7}\s*/, '')}
+          {item.description?.replace(/^\d{7}\s*/, "")}
         </CardDescription>
         <div className="flex-grow"></div>
         <p className="text-2xl font-bold font-sans text-primary mt-2">
-          ฿{item.price?.toFixed(2) || '0.00'}
+          ฿{item.price?.toFixed(2) || "0.00"}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
