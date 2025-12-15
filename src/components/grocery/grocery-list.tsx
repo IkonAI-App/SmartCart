@@ -8,7 +8,6 @@ import {
   Hits,
   RefinementList,
   Stats,
-  SortBy,
 } from "react-instantsearch";
 import algoliasearch from "algoliasearch/lite";
 import { GroceryItemCard } from "./grocery-item-card";
@@ -54,21 +53,6 @@ export default function GroceryList() {
                   resetIcon: 'hidden',
                 }}
              />
-          </div>
-          <div className="w-full md:w-auto">
-            <SortBy
-              classNames={{
-                root: 'w-full md:min-w-[200px]',
-                select: 'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-              }}
-              items={[
-                { value: 'products_manual', label: 'Relevance' },
-                { value: 'products_manual_price_asc', label: 'Price: Low to High' },
-                { value: 'products_manual_price_desc', label: 'Price: High to Low' },
-                { value: 'products_manual_name_asc', label: 'Name: A to Z' },
-                { value: 'products_manual_name_desc', label: 'Name: Z to A' },
-              ]}
-            />
           </div>
         </div>
 
