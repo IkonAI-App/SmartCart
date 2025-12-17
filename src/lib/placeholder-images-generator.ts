@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { GroceryItem } from './data';
 import type { ImagePlaceholder } from './placeholder-images';
+import { generateDynamicPlaceholder } from './placeholder-utils';
 
 function getKeywordsFromCategory(category: string): string {
     const categoryKeywords: { [key: string]: string } = {
@@ -62,7 +63,6 @@ function getKeywordsFromCategory(category: string): string {
         'milk & cream': 'milk cream',
         'cream': 'cream',
         'yogurts': 'yogurt',
-        'plain greek & natural': 'yogurt',
         'cheese': 'cheese',
         'block': 'cheese',
         'beer & cider': 'beer cider',
@@ -345,10 +345,13 @@ function getKeywordsFromCategory(category: string): string {
 export async function generatePlaceholderImages(items: GroceryItem[]) {
   const placeholderImages: ImagePlaceholder[] = items.map((item) => {
     const imageHint = getKeywordsFromCategory(item.category);
+    // Use dynamic SVG placeholder that generates instant, fast-loading images
+    // No external URLs - generates data URIs with diverse patterns and colors
+    const imageUrl = generateDynamicPlaceholder(item.name, item.category, 400, 300);
     return {
       id: `grocery-${item.id}`,
       description: item.name,
-      imageUrl: `https://picsum.photos/seed/${item.image_seed}/400/300`,
+      imageUrl: imageUrl,
       imageHint: imageHint,
     };
   });

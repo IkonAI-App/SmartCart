@@ -1,7 +1,7 @@
 "use client";
 
 import type { GroceryItem } from "@/lib/data";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { CategoryIcon } from "./category-icon";
 import Image from "next/image";
+import { generateDynamicPlaceholder } from "@/lib/placeholder-utils";
 
 interface GroceryItemCardProps {
   item: GroceryItem;
@@ -28,26 +29,109 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
   const imageCode = match ? match[0] : null;
   const paddedCode = imageCode?.padStart(7, "0");
 
+  // Generate dynamic placeholder once (deterministic based on item name/category)
+  // This is an SVG data URL that loads instantly without any network request
+  const dynamicPlaceholderUrl = generateDynamicPlaceholder(item.name, category, 400, 300);
+
   const primaryUrl = paddedCode
     ? `https://d19oj5aeuefgv.cloudfront.net/${paddedCode}`
-    : `https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop`;
+    : null;
 
   const fallbackUrl = paddedCode
     ? `https://d1vl5j0v241n75.cloudfront.net/${paddedCode}`
-    : `https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop`;
+    : null;
 
-  const staticPlaceholderUrl = `https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop`;
+  // Start with dynamic placeholder immediately - it loads instantly
+  // If we have CloudFront URLs, we'll try them but fallback quickly on error
+  const [imageUrl, setImageUrl] = useState(dynamicPlaceholderUrl);
+  const attemptedRef = useRef<Set<string>>(new Set());
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Check if current URL is a data URL (SVG placeholder)
+  const isDataUrl = imageUrl?.startsWith("data:");
 
-  const [imageUrl, setImageUrl] = useState(primaryUrl);
+  // Try to load CloudFront images if available, but don't block on them
+  useEffect(() => {
+    // Only try CloudFront URLs if we have them and haven't tried them yet
+    if (!primaryUrl || attemptedRef.current.has(primaryUrl)) return;
 
-  const handleImageError = () => {
-    if (imageUrl === primaryUrl) {
-      setImageUrl(fallbackUrl);
-    } else if (imageUrl === fallbackUrl) {
-      setImageUrl(staticPlaceholderUrl);
-    }
-    // If the static placeholder also fails, do nothing to prevent an infinite loop.
+    // Set a timeout to ensure we don't wait too long
+    const timeout = setTimeout(() => {
+      // If timeout expires, mark as attempted and ensure placeholder is shown
+      attemptedRef.current.add(primaryUrl);
+      if (fallbackUrl) attemptedRef.current.add(fallbackUrl);
+      setImageUrl((current) => {
+        // Only reset to placeholder if we're still trying to load CloudFront
+        if (current !== dynamicPlaceholderUrl && !current?.startsWith('data:')) {
+          return dynamicPlaceholderUrl;
+        }
+        return current;
+      });
+    }, 1500); // 1.5 second timeout - fail fast
+
+    // Try primary URL with better error handling
+    const img = new window.Image();
+    let loaded = false;
+    
+    img.onload = () => {
+      if (!loaded) {
+        loaded = true;
+        clearTimeout(timeout);
+        setImageUrl(primaryUrl);
+        attemptedRef.current.add(primaryUrl);
+      }
+    };
+    
+    img.onerror = () => {
+      if (!loaded) {
+        loaded = true;
+        clearTimeout(timeout);
+        attemptedRef.current.add(primaryUrl);
+        // Try fallback if primary fails
+        if (fallbackUrl && !attemptedRef.current.has(fallbackUrl)) {
+          const fallbackImg = new window.Image();
+          let fallbackLoaded = false;
+          
+          fallbackImg.onload = () => {
+            if (!fallbackLoaded) {
+              fallbackLoaded = true;
+              setImageUrl(fallbackUrl);
+              attemptedRef.current.add(fallbackUrl);
+            }
+          };
+          
+          fallbackImg.onerror = () => {
+            if (!fallbackLoaded) {
+              fallbackLoaded = true;
+              attemptedRef.current.add(fallbackUrl);
+              // Ensure we're using dynamic placeholder
+              setImageUrl(dynamicPlaceholderUrl);
+            }
+          };
+          
+          fallbackImg.src = fallbackUrl;
+        } else {
+          // No fallback or already tried - ensure dynamic placeholder
+          setImageUrl(dynamicPlaceholderUrl);
+        }
+      }
+    };
+    
+    img.src = primaryUrl;
+
+    return () => {
+      clearTimeout(timeout);
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [primaryUrl, fallbackUrl, dynamicPlaceholderUrl]);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    // Immediately fallback to dynamic placeholder on any error
+    // This prevents broken image icons from showing
+    e.preventDefault();
+    e.stopPropagation();
+    setImageUrl(dynamicPlaceholderUrl);
   };
 
   return (
@@ -69,14 +153,23 @@ export function GroceryItemCard({ item }: GroceryItemCardProps) {
         >
           {item.in_stock ? "In Stock" : "Out of Stock"}
         </Badge>
-        <div className="w-full h-48 bg-muted flex items-center justify-center relative">
+        <div className="w-full h-48 bg-muted flex items-center justify-center relative overflow-hidden">
           <Image
-            src={imageUrl}
+            key={imageUrl} // Force re-render when URL changes
+            src={imageUrl || dynamicPlaceholderUrl}
             alt={item.name}
             fill
             style={{ objectFit: "cover" }}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             onError={handleImageError}
+            onLoadingComplete={(img) => {
+              // Verify image actually loaded - if not, use placeholder
+              if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
+                setImageUrl(dynamicPlaceholderUrl);
+              }
+            }}
+            unoptimized={isDataUrl}
+            priority={false}
           />
         </div>
       </CardHeader>
