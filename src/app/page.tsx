@@ -1,7 +1,24 @@
-import { Header } from "@/components/header";
-import GroceryList from "@/components/grocery/grocery-list";
+"use client";
 
-export default async function Home() {
+import { Header } from "@/components/header";
+import dynamic from 'next/dynamic';
+
+const GroceryList = dynamic(() => import("@/components/grocery/grocery-list"), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background">
+            <span className="text-muted-foreground">Loading search...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ),
+});
+
+export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />

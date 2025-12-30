@@ -1,3 +1,4 @@
+import "@/lib/localStorage-polyfill";
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";

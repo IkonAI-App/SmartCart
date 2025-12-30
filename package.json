@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "amplify:logs": "./scripts/check-amplify-logs.sh"
+    "amplify:logs": "./scripts/check-amplify-logs.sh",
+    "update-algolia-settings": "npx tsx scripts/update-algolia-settings.ts"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",

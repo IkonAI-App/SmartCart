@@ -4,9 +4,16 @@ import path from 'path';
 import { parse } from 'csv-parse/sync';
 import algoliasearch from 'algoliasearch';
 
-// Initialize Algolia client
-const algoliaClient = algoliasearch('P4TK45JU0B', process.env.ALGOLIA_ADMIN_KEY || '');
-const algoliaIndex = algoliaClient.initIndex('products_manual');
+// Lazy initialization of Algolia client to avoid SSR issues
+let algoliaIndex: ReturnType<ReturnType<typeof algoliasearch>['initIndex']> | null = null;
+
+function getAlgoliaIndex() {
+  if (!algoliaIndex) {
+    const algoliaClient = algoliasearch('P4TK45JU0B', process.env.ALGOLIA_ADMIN_KEY || '');
+    algoliaIndex = algoliaClient.initIndex('products_manual');
+  }
+  return algoliaIndex;
+}
 
 export interface GroceryItem {
   id: string;
@@ -107,12 +114,13 @@ export async function indexGroceryItems(items: any[]) {
     }
 
     try {
+        const index = getAlgoliaIndex();
         // Clear existing objects before saving new ones
-        await algoliaIndex.clearObjects();
-        const { taskID } = await algoliaIndex.saveObjects(items, {
+        await index.clearObjects();
+        const { taskID } = await index.saveObjects(items, {
             autoGenerateObjectIDIfNotExist: false
         });
-        await algoliaIndex.waitTask(taskID);
+        await index.waitTask(taskID);
         console.log(`Successfully indexed ${items.length} items to Algolia.`);
     } catch (error) {
         console.error("Error indexing to Algolia:", error);
