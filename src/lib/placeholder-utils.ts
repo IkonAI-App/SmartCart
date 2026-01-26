@@ -11,8 +11,12 @@ export function generateDynamicPlaceholder(
   width: number = 400,
   height: number = 300
 ): string {
+  // Handle undefined/null values with defaults
+  const safeName = name || "Item";
+  const safeCategory = category || "";
+  
   // Extract initials from name (first letter of first 2-3 words)
-  const words = name.split(/\s+/).filter((w) => w.length > 0);
+  const words = safeName.split(/\s+/).filter((w) => w.length > 0);
   const initials = words
     .slice(0, 3)
     .map((w) => w[0].toUpperCase())
@@ -20,7 +24,7 @@ export function generateDynamicPlaceholder(
     .substring(0, 3);
 
   // Generate a color based on the name (deterministic hash)
-  const hash = simpleHash(name + (category || ""));
+  const hash = simpleHash(safeName + safeCategory);
   const hue = hash % 360;
   const saturation = 50 + (hash % 30); // 50-80%
   const lightness = 40 + (hash % 20); // 40-60%
@@ -36,11 +40,11 @@ export function generateDynamicPlaceholder(
   const patternType = hash % 6; // 0-5 different patterns
   
   // Get icon paths for the category
-  const iconData = category ? getIconPaths(category) : null;
+  const iconData = safeCategory ? getIconPaths(safeCategory) : null;
   const iconSize = Math.min(width * 0.2, height * 0.2, 80);
   const iconScale = iconSize / 24; // Lucide icons are 24x24
   const iconX = width / 2;
-  const iconY = height / 2 - (category ? 25 : 0);
+  const iconY = height / 2 - (safeCategory ? 25 : 0);
   
   // Create icon SVG paths with proper scaling and centering
   const iconSvg = iconData ? `
@@ -91,7 +95,7 @@ export function generateDynamicPlaceholder(
       >
         ${initials || "?"}
       </text>
-      ${category ? `
+      ${safeCategory ? `
         <text 
           x="50%" 
           y="${iconSvg ? '82%' : '65%'}" 
@@ -102,7 +106,7 @@ export function generateDynamicPlaceholder(
           dominant-baseline="central"
           opacity="0.75"
         >
-          ${category.substring(0, 24)}
+          ${safeCategory.substring(0, 24)}
         </text>
       ` : ""}
     </svg>

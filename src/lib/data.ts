@@ -18,10 +18,16 @@ function getAlgoliaIndex() {
 export interface GroceryItem {
   id: string;
   name: string;
+  nameThai?: string;
   category: string;
+  categoryL1?: string;
+  categoryL2?: string;
+  categoryL3?: string;
+  brand?: string;
   price: number;
   in_stock: boolean;
   description: string;
+  sku?: string; // Product code (cprcode) for image URLs
 }
 
 const getCsvFilePath = () =>
