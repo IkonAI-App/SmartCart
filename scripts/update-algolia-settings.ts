@@ -1,8 +1,8 @@
 import algoliasearch from 'algoliasearch';
 
 const APPLICATION_ID = 'P4TK45JU0B';
-const API_KEY = '0fd2b90ced718f518448322f9a5e4ccf';
-const INDEX_NAME = 'products_manual';
+const API_KEY = '64184577655ffed78204541f0519f7cd';
+const INDEX_NAME = 'Villa_online_products';
 
 const algoliaClient = algoliasearch(APPLICATION_ID, API_KEY);
 const index = algoliaClient.initIndex(INDEX_NAME);
@@ -35,8 +35,25 @@ async function updateIndexSettings() {
       // Attributes to retrieve in search results
       attributesToRetrieve: [
         'objectID',
+        'cprcode',
         'pr_engname',
+        'pr_online_name_en',
+        'hema_name_en',
+        'pr_name_en',
+        'pr_name_th',
+        'pr_online_name_th',
+        'hema_name_th',
         'online_category_l1_en',
+        'online_category_l1_th',
+        'online_category_l2_en',
+        'online_category_l2_th',
+        'online_category_l3_en',
+        'online_category_l3_th',
+        'villa_category_l1_en',
+        'hema_brand_en',
+        'hema_brand_th',
+        'pr_brand_en',
+        'pr_brand_th',
         'ba_nprice',
         'pr_active',
         'content_en',
@@ -63,11 +80,11 @@ async function updateIndexSettings() {
       minWordSizefor2Typos: 8,
       allowTyposOnNumericTokens: false, // Don't allow typos on prices
 
-      // Search mode - Neural/Semantic Search
-      mode: 'neuralSearch', // Semantic search enabled
-      semanticSearch: {
-        eventSources: ['click', 'conversion'], // Event sources for learning from user behavior
-      },
+      // Search mode - Neural/Semantic Search (disabled if not supported on cluster)
+      // mode: 'neuralSearch', // Semantic search enabled
+      // semanticSearch: {
+      //   eventSources: ['click', 'conversion'], // Event sources for learning from user behavior
+      // },
 
       // Query settings
       queryType: 'prefixLast', // Only last word is treated as prefix

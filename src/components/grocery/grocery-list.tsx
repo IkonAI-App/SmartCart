@@ -16,9 +16,12 @@ import { GroceryItemCard } from "./grocery-item-card";
 import { useEffect, useState, useMemo } from "react";
 
 function Hit({ hit }: { hit: any }) {
-  // The hit object from Algolia might have a different structure.
+  // The hit object from Algolia has fields prefixed with "data."
   // We need to map it to what GroceryItemCard expects.
   // We also need to handle the fact that Algolia might return highlighted snippets.
+  
+  // Debug: Log the hit structure to understand the data format
+  // console.log('Hit structure:', hit);
   
   // Helper to extract plain text from potentially highlighted Algolia results
   const getPlainText = (value: any): string | undefined => {
@@ -30,8 +33,12 @@ function Hit({ hit }: { hit: any }) {
     }
     
     if (typeof value === 'string') {
-      // Remove HTML tags (from Algolia highlighting) and trim
-      const cleaned = value.replace(/<[^>]*>/g, '').trim();
+      // Remove HTML tags and Algolia highlight tags (__ais-highlight__...__/ais-highlight__)
+      const cleaned = value
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/__ais-highlight__/g, '') // Remove highlight start tags
+        .replace(/__\/ais-highlight__/g, '') // Remove highlight end tags
+        .trim();
       return cleaned || undefined;
     }
     
@@ -39,35 +46,65 @@ function Hit({ hit }: { hit: any }) {
     return str || undefined;
   };
 
+  // Helper to get field value, checking both data.* prefix and root level
+  const getField = (fieldName: string): any => {
+    // First check if there's a nested data object
+    if (hit.data && typeof hit.data === 'object' && fieldName in hit.data) {
+      return hit.data[fieldName];
+    }
+    // Check for flat structure with "data." prefix (e.g., "data.online_category_l1_en")
+    const flatKey = `data.${fieldName}`;
+    if (flatKey in hit) {
+      return hit[flatKey];
+    }
+    // Fallback to root level
+    return hit[fieldName];
+  };
+
+  // Helper to get highlighted field value
+  const getHighlightedField = (fieldName: string): any => {
+    // First check if there's a nested data object
+    if (hit._highlightResult?.data && typeof hit._highlightResult.data === 'object' && fieldName in hit._highlightResult.data) {
+      return hit._highlightResult.data[fieldName];
+    }
+    // Check for flat structure with "data." prefix
+    const flatKey = `data.${fieldName}`;
+    if (hit._highlightResult && flatKey in hit._highlightResult) {
+      return hit._highlightResult[flatKey];
+    }
+    // Fallback to root level
+    return hit._highlightResult?.[fieldName];
+  };
+
   // Try multiple fields for product name (fallback chain)
   const productName = 
-    getPlainText(hit.pr_engname) || 
-    getPlainText(hit._highlightResult?.pr_engname?.value) ||
-    getPlainText(hit.pr_online_name_en) ||
-    getPlainText(hit.hema_name_en) ||
-    getPlainText(hit.pr_name_en);
+    getPlainText(getHighlightedField('pr_engname')?.value) ||
+    getPlainText(getField('pr_engname')) || 
+    getPlainText(getField('pr_online_name_en')) ||
+    getPlainText(getField('hema_name_en')) ||
+    getPlainText(getField('pr_name_en'));
 
   // Try multiple fields for Thai name (fallback chain)
   const productNameThai = 
-    getPlainText(hit.pr_name_th) ||
-    getPlainText(hit.pr_online_name_th) ||
-    getPlainText(hit.hema_name_th);
+    getPlainText(getField('pr_name_th')) ||
+    getPlainText(getField('pr_online_name_th')) ||
+    getPlainText(getField('hema_name_th'));
 
   // Try multiple fields for brand (fallback chain)
   const brand = 
-    getPlainText(hit.hema_brand_en) ||
-    getPlainText(hit.pr_brand_en) ||
-    getPlainText(hit.hema_brand_th) ||
-    getPlainText(hit.pr_brand_th);
+    getPlainText(getField('hema_brand_en')) ||
+    getPlainText(getField('pr_brand_en')) ||
+    getPlainText(getField('hema_brand_th')) ||
+    getPlainText(getField('pr_brand_th'));
 
   // Get category levels
   const categoryL1 = 
-    getPlainText(hit.online_category_l1_en) || 
-    getPlainText(hit._highlightResult?.online_category_l1_en?.value) ||
-    getPlainText(hit.villa_category_l1_en);
+    getPlainText(getHighlightedField('online_category_l1_en')?.value) ||
+    getPlainText(getField('online_category_l1_en')) || 
+    getPlainText(getField('villa_category_l1_en'));
   
-  const categoryL2 = getPlainText(hit.online_category_l2_en);
-  const categoryL3 = getPlainText(hit.online_category_l3_en);
+  const categoryL2 = getPlainText(getField('online_category_l2_en'));
+  const categoryL3 = getPlainText(getField('online_category_l3_en'));
 
   // Use L1 as the main category for backwards compatibility
   const category = categoryL1 || '';
@@ -81,10 +118,10 @@ function Hit({ hit }: { hit: any }) {
     categoryL2: categoryL2,
     categoryL3: categoryL3,
     brand: brand,
-    price: parseFloat(hit.ba_nprice) || 0,
-    in_stock: hit.pr_active === 'True' || hit.pr_active === true,
-    description: getPlainText(hit.content_en) || getPlainText(hit._highlightResult?.content_en?.value) || '',
-    sku: hit.cprcode ? String(hit.cprcode).padStart(7, '0') : undefined,
+    price: parseFloat(getField('ba_nprice') || '0') || 0,
+    in_stock: getField('pr_active') === 'True' || getField('pr_active') === 'true' || getField('pr_active') === true,
+    description: getPlainText(getHighlightedField('content_en')?.value) || getPlainText(getField('content_en')) || '',
+    sku: hit.cprcode || getField('cprcode') ? String(hit.cprcode || getField('cprcode')).padStart(7, '0') : undefined,
   };
   return <GroceryItemCard item={item} />;
 }
@@ -187,7 +224,7 @@ export default function GroceryList() {
         search: () => Promise.resolve({ results: [] }),
       } as any;
     }
-    return algoliasearch("P4TK45JU0B", "79eda3e9b05111a55a3e8fefd859c145");
+    return algoliasearch("P4TK45JU0B", "64184577655ffed78204541f0519f7cd");
   }, []);
 
   if (!mounted) {
@@ -207,7 +244,7 @@ export default function GroceryList() {
   return (
     <InstantSearch
       searchClient={searchClient}
-      indexName="products_manual"
+      indexName="Villa_online_products"
     >
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row gap-4">

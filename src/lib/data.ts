@@ -10,7 +10,7 @@ let algoliaIndex: ReturnType<ReturnType<typeof algoliasearch>['initIndex']> | nu
 function getAlgoliaIndex() {
   if (!algoliaIndex) {
     const algoliaClient = algoliasearch('P4TK45JU0B', process.env.ALGOLIA_ADMIN_KEY || '');
-    algoliaIndex = algoliaClient.initIndex('products_manual');
+    algoliaIndex = algoliaClient.initIndex('Villa_online_products');
   }
   return algoliaIndex;
 }
