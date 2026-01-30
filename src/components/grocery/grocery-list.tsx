@@ -184,29 +184,28 @@ function SearchResults() {
   );
 }
 
-// Component to conditionally show categories only when there's a query
+// Category section on the left - always visible; RefinementList shows facets when there's a query
 function CategoryFilters() {
   const { query } = useSearchBox();
-  
-  // Don't show categories if there's no query
-  if (!query || query.trim() === '') {
-    return null;
-  }
-  
+
   return (
-    <>
+    <div className="space-y-2">
       <h3 className="font-bold mb-2">Category</h3>
-      <RefinementList 
-        attribute="online_category_l1_en"
-        classNames={{
-          list: 'space-y-2',
-          label: 'flex items-center space-x-2',
-          checkbox: 'h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary',
-          labelText: 'text-sm',
-          count: 'ml-auto text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground',
-        }}
-      />
-    </>
+      {query && query.trim() !== '' ? (
+        <RefinementList
+          attribute="data.online_category_l1_en"
+          classNames={{
+            list: 'space-y-2',
+            label: 'flex items-center space-x-2',
+            checkbox: 'h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary',
+            labelText: 'text-sm',
+            count: 'ml-auto text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground',
+          }}
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground">Search to filter by category</p>
+      )}
+    </div>
   );
 }
 
